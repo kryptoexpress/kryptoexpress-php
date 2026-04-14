@@ -1,13 +1,8 @@
 # KryptoExpress PHP SDK
 
-Framework-agnostic PHP SDK for the KryptoExpress API.
+PHP SDK for the KryptoExpress API.
 
-## Goals
-
-- Composer-friendly package for Packagist.
-- Works in plain PHP without Laravel, Symfony, Yii, WordPress, or WooCommerce.
-- Keeps business terminology aligned with other KryptoExpress SDKs.
-- Leaves WooCommerce for a separate integration layer.
+This package is framework-agnostic. It works in plain PHP and can be used as the core layer for framework or CMS integrations, including a future WooCommerce plugin.
 
 ## Install
 
@@ -20,6 +15,12 @@ For PSR-18 mode install a PSR-18 client and PSR-17 factory, for example:
 ```bash
 composer require symfony/http-client nyholm/psr7
 ```
+
+## Requirements
+
+- PHP 8.2 or newer
+- `ext-json`
+- `ext-hash`
 
 ## Quick Start
 
@@ -43,7 +44,7 @@ $prices = $client->currencies()->getPrices(['BTC', 'ETH'], 'USD');
 $fiatCurrencies = $client->fiat()->list();
 ```
 
-## Public API
+## Client Methods
 
 ```php
 $client->payments()->create($request);
@@ -67,18 +68,18 @@ $client->currencies()->getPrices(...);
 $client->fiat()->list();
 ```
 
-## Business Rules
+## Payment Rules
 
 - `PAYMENT` requires `fiatAmount`.
 - `DEPOSIT` must not send `fiatAmount`.
 - Stablecoins support only `PAYMENT`.
-- Stablecoin payments are exact-payment flows in KryptoExpress business semantics.
-- Minimum payment amount must be at least the equivalent of `1 USD`.
-- If minimum validation is enabled and fiat is not `USD`, provide a fiat converter or the SDK will throw `CurrencyConversionError`.
+- Stablecoin payments are exact-payment only.
+- The minimum payment amount is equivalent to `1 USD`.
+- If minimum validation is enabled and fiat is not `USD`, pass a fiat converter or the SDK will throw `CurrencyConversionError`.
 
 ## Fiat Conversion
 
-The API does not expose a dedicated fiat-to-fiat endpoint, so minimum amount validation uses an explicit converter abstraction.
+The API does not expose a fiat-to-fiat conversion endpoint. For client-side minimum amount validation in non-USD fiat currencies, pass a converter explicitly.
 
 ```php
 <?php
@@ -98,6 +99,20 @@ $client = new KryptoExpressClient(
 );
 ```
 
+You can also disable client-side minimum validation:
+
+```php
+<?php
+
+use KryptoExpress\SDK\ClientConfig;
+use KryptoExpress\SDK\KryptoExpressClient;
+
+$client = new KryptoExpressClient(
+    'your-api-key',
+    new ClientConfig(validateMinimumAmounts: false),
+);
+```
+
 ## Webhook Signatures
 
 - Header: `X-Signature`
@@ -111,19 +126,34 @@ $client = new KryptoExpressClient(
 $isValid = $client->webhook()->verify($rawBody, 'callback-secret', $_SERVER['HTTP_X_SIGNATURE'] ?? null);
 ```
 
-## Transport Options
+## Transport
 
 - `NativeTransport` is the default and works without extra runtime packages.
 - `Psr18Transport` can be used when you already have a PSR-18 client stack.
 
-## Known Source Ambiguities
+## Using A PSR-18 Client
+
+```php
+<?php
+
+use KryptoExpress\SDK\KryptoExpressClient;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Symfony\Component\HttpClient\Psr18Client;
+
+$client = KryptoExpressClient::withPsr18(
+    'your-api-key',
+    new Psr18Client(),
+    new Psr17Factory(),
+);
+```
+
+## Notes
 
 - Practical docs say native coins are `BTC`, `LTC`, `ETH`, `SOL`, `BNB`, `DOGE`, while OpenAPI also includes `TRX`.
 - Practical docs list stablecoins on `ERC20`, `BEP20`, and `SOL`, while OpenAPI also includes `USDT_TRC20`.
 - OpenAPI examples for `/cryptocurrency` and `/cryptocurrency/stable` contain broader enums than the practical guide suggests.
 - The practical docs are authoritative for `PAYMENT` vs `DEPOSIT`, stablecoin semantics, minimum amount policy, and webhook signature behavior.
 
-## WooCommerce Integration Boundary
+## WooCommerce
 
-This SDK intentionally does not contain WordPress hooks, WooCommerce gateway classes, admin settings, callback routing, or order-status mapping.
-A future WooCommerce plugin should depend on this package and translate WooCommerce events and settings into SDK calls.
+This package does not include WordPress or WooCommerce code. A WooCommerce plugin should use this SDK as its core API layer and keep hooks, settings, gateway classes, callback routing, and order-status mapping in a separate integration package.
