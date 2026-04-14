@@ -10,21 +10,22 @@ use KryptoExpress\SDK\Error\MinimumAmountError;
 final class MinimumAmountPolicy
 {
     public function __construct(
-        private readonly FiatConverterInterface $converter,
+        ?FiatConverterInterface $converter = null,
         private readonly float $minimumUsdEquivalent = 1.0,
     ) {
+        unset($converter);
     }
 
     public function assertSatisfied(float $fiatAmount, string $fiatCurrency): void
     {
-        $minimumAmount = $this->converter->convertUsdToFiat($this->minimumUsdEquivalent, $fiatCurrency);
+        if (strtoupper($fiatCurrency) !== 'USD') {
+            return;
+        }
 
-        if ($fiatAmount < $minimumAmount) {
+        if ($fiatAmount < $this->minimumUsdEquivalent) {
             throw new MinimumAmountError(sprintf(
-                'The minimum payment amount is equivalent to %.2f USD. Minimum for %s is %.8f.',
+                'The minimum payment amount for USD payments is %.2f USD.',
                 $this->minimumUsdEquivalent,
-                strtoupper($fiatCurrency),
-                $minimumAmount,
             ));
         }
     }

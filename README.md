@@ -74,12 +74,14 @@ $client->fiat()->list();
 - `DEPOSIT` must not send `fiatAmount`.
 - Stablecoins support only `PAYMENT`.
 - Stablecoin payments are exact-payment only.
-- The minimum payment amount is equivalent to `1 USD`.
-- If minimum validation is enabled and fiat is not `USD`, pass a fiat converter or the SDK will throw `CurrencyConversionError`.
+- Client-side minimum amount validation is applied only to `USD` payments.
+- For `USD`, the minimum amount is `1.00`.
+- Non-USD payments are sent to the API without local minimum threshold validation.
 
 ## Fiat Conversion
 
-The API does not expose a fiat-to-fiat conversion endpoint. For client-side minimum amount validation in non-USD fiat currencies, pass a converter explicitly.
+The SDK no longer requires a fiat converter for normal non-USD payment creation.
+If you keep using a converter abstraction in your application, treat it as an optional extension rather than a required part of the default payment flow.
 
 ```php
 <?php
@@ -99,7 +101,7 @@ $client = new KryptoExpressClient(
 );
 ```
 
-You can also disable client-side minimum validation:
+You can also disable the remaining USD client-side minimum validation:
 
 ```php
 <?php

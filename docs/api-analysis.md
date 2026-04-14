@@ -92,7 +92,8 @@
 - `DEPOSIT` must not include `fiatAmount`.
 - Stablecoins support only `PAYMENT`.
 - Stablecoin payments are exact-payment flows by business semantics.
-- Minimum amount is equivalent to `1 USD`.
+- Minimum amount is validated client-side only for `USD` payments.
+- Non-USD payments are sent without local minimum threshold validation.
 - Callback signatures use `X-Signature` and `HMAC-SHA512` over compact JSON.
 - Payment lookup is public and keyed by `hash`.
 - Withdrawal dry-run is represented by `onlyCalculate = true`.
@@ -104,11 +105,11 @@
 - OpenAPI enum examples for `/cryptocurrency` and `/cryptocurrency/stable` are broader than the practical guide and appear copy-pasted.
 - OpenAPI does not encode the practical stablecoin business rules or the exact-payment semantics strongly enough.
 - OpenAPI describes errors only partially. Practical docs give operational rules, but not a full error matrix.
-- The API has no dedicated fiat-to-fiat conversion endpoint, so local validation of the `1 USD` minimum needs an injected converter abstraction.
+- The API has no dedicated fiat-to-fiat conversion endpoint, which makes non-USD client-side threshold validation undesirable.
 
 ## Safe SDK Decisions
 
 - Prefer practical docs for business semantics.
 - Keep runtime currency discovery server-driven instead of hardcoding the full enum set.
 - Detect stablecoins by business naming convention (`USDT_*`, `USDC_*`) for validation.
-- Require an explicit fiat converter for non-USD minimum validation when client-side validation is enabled.
+- Apply local minimum validation only to `USD` payments and let non-USD payments be validated by the API.

@@ -7,11 +7,9 @@ namespace KryptoExpress\SDK\Tests\Unit\Resource;
 use KryptoExpress\SDK\ClientConfig;
 use KryptoExpress\SDK\DTO\Payment\CreatePaymentRequest;
 use KryptoExpress\SDK\Enum\PaymentType;
-use KryptoExpress\SDK\Error\CurrencyConversionError;
 use KryptoExpress\SDK\Error\MinimumAmountError;
 use KryptoExpress\SDK\Error\UnsupportedPaymentModeError;
 use KryptoExpress\SDK\KryptoExpressClient;
-use KryptoExpress\SDK\Rules\StaticFiatConverter;
 use KryptoExpress\SDK\Tests\Unit\FakeTransport;
 use PHPUnit\Framework\TestCase;
 
@@ -113,14 +111,14 @@ final class PaymentsResourceTest extends TestCase
         ));
     }
 
-    public function testMinimumAmountPolicyUsesConverterForNonUsdFiat(): void
+    public function testNonUsdPaymentBypassesClientSideMinimumValidation(): void
     {
         $transport = new FakeTransport([
             'POST /payment' => [
                 'id' => 1,
                 'paymentType' => 'PAYMENT',
                 'fiatCurrency' => 'EUR',
-                'fiatAmount' => 1.2,
+                'fiatAmount' => 0.5,
                 'cryptoAmount' => 0.0001,
                 'cryptoCurrency' => 'BTC',
                 'expireDatetime' => 1,
@@ -134,21 +132,13 @@ final class PaymentsResourceTest extends TestCase
             ],
         ]);
 
-        $client = new KryptoExpressClient(
-            'key',
-            new ClientConfig(fiatConverter: new StaticFiatConverter(['EUR' => 0.91])),
-            $transport,
-        );
+        $client = new KryptoExpressClient('key', new ClientConfig(), $transport);
 
-        self::assertSame('EUR', $client->payments()->createPayment('BTC', 'EUR', 1.2, 'https://merchant.example/callback')->fiatCurrency);
-    }
+        $payment = $client->payments()->createPayment('BTC', 'EUR', 0.5, 'https://merchant.example/callback');
 
-    public function testMissingConverterRaisesErrorForNonUsdMinimumValidation(): void
-    {
-        $client = new KryptoExpressClient('key', new ClientConfig(), new FakeTransport());
-
-        $this->expectException(CurrencyConversionError::class);
-
-        $client->payments()->createPayment('BTC', 'EUR', 2.0, 'https://merchant.example/callback');
+        self::assertSame('EUR', $payment->fiatCurrency);
+        self::assertIsArray($transport->requests[0]['json']);
+        self::assertArrayHasKey('fiatAmount', $transport->requests[0]['json']);
+        self::assertSame(0.5, $transport->requests[0]['json']['fiatAmount']);
     }
 }
