@@ -43,6 +43,8 @@ final class PaymentsResourceTest extends TestCase
 
         self::assertSame(PaymentType::PAYMENT, $payment->paymentType);
         self::assertSame('payment-hash', $payment->hash);
+        self::assertIsArray($transport->requests[0]['json']);
+        self::assertArrayHasKey('fiatAmount', $transport->requests[0]['json']);
         self::assertSame(1.0, $transport->requests[0]['json']['fiatAmount']);
     }
 

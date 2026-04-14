@@ -9,12 +9,6 @@
     "issues": "https://github.com/kryptoexpress/kryptoexpress-php-sdk/issues",
     "source": "https://github.com/kryptoexpress/kryptoexpress-php-sdk"
   },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/kryptoexpress/kryptoexpress-php-sdk.git"
-    }
-  ],
   "require": {
     "php": "^8.2",
     "ext-hash": "*",
@@ -42,8 +36,8 @@
   "scripts": {
     "test": "phpunit --configuration phpunit.xml.dist",
     "analyse": "phpstan analyse",
-    "lint": "php-cs-fixer fix --dry-run --diff",
-    "format": "php-cs-fixer fix"
+    "lint": "php-cs-fixer fix --dry-run --diff --allow-risky=yes",
+    "format": "php-cs-fixer fix --allow-risky=yes"
   },
   "config": {
     "sort-packages": true,

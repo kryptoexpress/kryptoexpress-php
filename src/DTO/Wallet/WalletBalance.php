@@ -21,7 +21,7 @@ final class WalletBalance
         $balances = [];
 
         foreach ($payload as $currency => $amount) {
-            if (!is_string($currency) || (!is_int($amount) && !is_float($amount))) {
+            if (!is_int($amount) && !is_float($amount)) {
                 continue;
             }
 

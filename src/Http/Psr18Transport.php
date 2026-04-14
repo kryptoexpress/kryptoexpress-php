@@ -28,7 +28,7 @@ final class Psr18Transport implements TransportInterface
         string $path,
         array $query = [],
         ?array $json = null,
-        bool $authenticated = true
+        bool $authenticated = true,
     ): array {
         $url = rtrim($this->config->baseUrl, '/') . '/' . ltrim($path, '/');
 

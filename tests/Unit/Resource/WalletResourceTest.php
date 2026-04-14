@@ -34,6 +34,8 @@ final class WalletResourceTest extends TestCase
         $withdrawal = $client->wallet()->calculateAll('LTC', 'ltc1qaddress');
 
         self::assertTrue($withdrawal->onlyCalculate);
+        self::assertIsArray($transport->requests[0]['json']);
+        self::assertArrayHasKey('onlyCalculate', $transport->requests[0]['json']);
         self::assertTrue($transport->requests[0]['json']['onlyCalculate']);
     }
 }

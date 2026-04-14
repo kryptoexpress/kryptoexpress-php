@@ -28,7 +28,7 @@ final class KryptoExpressClient
     private readonly SignatureVerifier $signatureVerifier;
 
     public function __construct(
-        private readonly string $apiKey,
+        string $apiKey,
         ?ClientConfig $config = null,
         ?TransportInterface $transport = null,
     ) {

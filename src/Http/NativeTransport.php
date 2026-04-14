@@ -24,7 +24,7 @@ final class NativeTransport implements TransportInterface
         string $path,
         array $query = [],
         ?array $json = null,
-        bool $authenticated = true
+        bool $authenticated = true,
     ): array {
         $attempt = 0;
         $url = $this->buildUrl($path, $query);
@@ -53,8 +53,26 @@ final class NativeTransport implements TransportInterface
             ],
         ]);
 
-        $responseBody = @file_get_contents($url, false, $context);
-        $responseHeaders = $http_response_header ?? [];
+        $handle = @fopen($url, 'rb', false, $context);
+
+        if ($handle === false) {
+            throw new SDKError(sprintf('Network request to "%s" failed.', $url));
+        }
+
+        $metadata = stream_get_meta_data($handle);
+        $responseBody = stream_get_contents($handle);
+        fclose($handle);
+
+        $responseHeaders = [];
+
+        if (isset($metadata['wrapper_data']) && is_array($metadata['wrapper_data'])) {
+            foreach ($metadata['wrapper_data'] as $header) {
+                if (is_string($header)) {
+                    $responseHeaders[] = $header;
+                }
+            }
+        }
+
         $statusCode = $this->extractStatusCode($responseHeaders);
 
         if ($responseBody === false && $statusCode === 0) {

@@ -31,7 +31,7 @@ final class FakeTransport implements TransportInterface
         string $path,
         array $query = [],
         ?array $json = null,
-        bool $authenticated = true
+        bool $authenticated = true,
     ): array {
         $this->requests[] = compact('method', 'path', 'query', 'json', 'authenticated');
 
