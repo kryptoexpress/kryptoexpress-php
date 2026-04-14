@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ramsey/composer-install@v3
+      - run: composer validate --strict
+      - name: Packagist update hook
+        if: ${{ secrets.PACKAGIST_UPDATE_TOKEN != '' }}
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"repository\":{\"url\":\"https://github.com/${{ github.repository }}\"}}" \
+            "https://packagist.org/api/update-package?username=token&apiToken=${{ secrets.PACKAGIST_UPDATE_TOKEN }}"
