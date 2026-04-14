@@ -1,13 +1,13 @@
 {
-  "name": "kryptoexpress/kryptoexpress-php-sdk",
+  "name": "kryptoexpress/kryptoexpress-php",
   "description": "Framework-agnostic PHP SDK for the KryptoExpress API.",
   "type": "library",
   "license": "MIT",
   "keywords": ["kryptoexpress", "crypto", "payments", "wallet", "sdk", "php"],
   "homepage": "https://kryptoexpress.pro",
   "support": {
-    "issues": "https://github.com/kryptoexpress/kryptoexpress-php-sdk/issues",
-    "source": "https://github.com/kryptoexpress/kryptoexpress-php-sdk"
+    "issues": "https://github.com/kryptoexpress/kryptoexpress-php/issues",
+    "source": "https://github.com/kryptoexpress/kryptoexpress-php"
   },
   "require": {
     "php": "^8.2",
@@ -41,6 +41,9 @@
   },
   "config": {
     "sort-packages": true,
+    "platform": {
+      "php": "8.2.0"
+    },
     "allow-plugins": {
       "phpstan/extension-installer": false
     }

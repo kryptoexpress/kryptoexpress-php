@@ -12,7 +12,7 @@ Framework-agnostic PHP SDK for the KryptoExpress API.
 ## Install
 
 ```bash
-composer require kryptoexpress/kryptoexpress-php-sdk
+composer require kryptoexpress/kryptoexpress-php
 ```
 
 For PSR-18 mode install a PSR-18 client and PSR-17 factory, for example:
